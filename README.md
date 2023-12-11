@@ -1,6 +1,3 @@
-holbertonschool-Markdown2HTML
-holbertonschool-Markdown2HTML
-
 My title
 My title2
 My title3
