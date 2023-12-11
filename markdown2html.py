@@ -1,37 +1,46 @@
 #!/usr/bin/python3
-"""
-script that takes 2 arguments
-"""
+"""Write a script markdown2html.py that takes an argument 2 strings:"""
 import sys
-from os import path
-import re
 
+def convert_heading(line):
+    if line.startswith("#"):
+        heading_level = min(line.count("#"), 6)
+        heading_text = line.strip("# ").strip()
+        html_heading = f"<h{heading_level}>{heading_text}</h{heading_level}>"
+        return html_heading
+    else:
+        return line
+def convert_unordered_list(line):
+    if line.startswith("- ") and not line.startswith("# "):
+        list_item = line.strip("- ").strip()
+        html_list_item = f"<li>{list_item}</li>"
+        return html_list_item
+    else:
+        return line
+
+
+def markdown_file(name, output):
+    try:
+        with open(name, 'r') as file:
+            markdown_lines = file.readlines()
+
+        converted_lines = []
+        for line in markdown_lines:
+            converted_line = convert_heading(line)
+            converted_line = convert_unordered_list(converted_line)
+            converted_lines.append(converted_line)
+
+        with open(output, 'w') as file:
+            for line in converted_lines:
+                file.write(line)
+
+    except FileNotFoundError:
+        sys.stderr.write(f"Missing {name}\n")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    """
-    a function that turns markdown to html 
-    """
-    if len(sys.argv) < 3:
+    if len(sys.argv) != 3:
         sys.stderr.write("Usage: ./markdown2html.py README.md README.html\n")
         sys.exit(1)
-    elif not path.exists(sys.argv[1]) or not sys.argv[1].endswith('.md'):
-        sys.stderr.write("Missing {}\n".format(sys.argv[1]))
-        sys.exit(1)
-    else:
-        html = []
-        with open(sys.argv[1], 'r') as file:
-            text = file.readlines()
-            text[-1] = text[-1].replace('\n', '')
 
-        with open(sys.argv[2], 'w') as file:
-            for string in text:
-                # convert (#) to html headings (h1 - h6)
-                count = string.count('#')
-                if count != 0:
-                    html_replace = string.replace('#' * count + ' ', '')
-                    html_replace = html_replace.replace('\n', '')
-                    html_line = "<h{}>{}</h{}>\n".format(
-                        count, html_replace, count)
-                    html.append(html_line)
-            file.writelines(html)
-            sys.exit(0)
+    markdown_file(sys.argv[1], sys.argv[2])
